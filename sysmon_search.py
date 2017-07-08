@@ -1,7 +1,5 @@
-import bs4
 import requests
 import sys
-import re
 import json
 import pprint
 
@@ -24,22 +22,17 @@ def sendrest(url):
     response = requests.get(path, data = json.dumps(jsonstring))
     print(json.dumps(jsonstring))
     pprint.pprint(response.json())
+    parser(response)
 
+def parser(response):
+    hitn = response.json()["hits"]["total"]
 
+    for i in range(hitn):
+        print(response.json()["hits"]["hits"][i]["_source"]["@timestamp"])
+        print(response.json()["hits"]["hits"][i]["_source"]["event_data"]["Image"])
+        print(response.json()["hits"]["hits"][i]["_source"]["event_data"]["ImageLoaded"])
+        print("")
 
-    # soup = bs4.BeautifulSoup(res.text,"lxml")
-    # text = soup.title.string
-    # sents = soup.find_all(['p','div','pre'])
-    # for sent in sents:
-	 #    text += sent.text
-    #
-    # text = re.sub('[\n\r\t]',' ',text)
-    # text = re.sub(r'\ +',' ',text)
-    # text = re.sub(r'\|',' ',text)
-    # print(text)
 
 if __name__ == "__main__":
     sendrest(sys.argv[1:])
-
-
-#全ての時刻を集めて、そのバラツキをみればよさそう。それに加えてImageが同じものであること。
