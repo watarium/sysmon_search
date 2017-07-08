@@ -1,6 +1,7 @@
 import requests
 import sys
 import json
+import pandas as pd
 import pprint
 
 jsonstring = {
@@ -20,18 +21,28 @@ def sendrest(url):
 
     path = 'http://' + url[0] + '/winlogbeat-*/_search?pretty=true'
     response = requests.get(path, data = json.dumps(jsonstring))
-    print(json.dumps(jsonstring))
-    pprint.pprint(response.json())
+    #print(json.dumps(jsonstring))
+    #pprint.pprint(response.json())
     parser(response)
 
 def parser(response):
     hitn = response.json()["hits"]["total"]
+    eventlist = []
 
     for i in range(hitn):
-        print(response.json()["hits"]["hits"][i]["_source"]["@timestamp"])
-        print(response.json()["hits"]["hits"][i]["_source"]["event_data"]["Image"])
-        print(response.json()["hits"]["hits"][i]["_source"]["event_data"]["ImageLoaded"])
-        print("")
+        res_src = response.json()["hits"]["hits"][i]["_source"]
+        eventdata = res_src["event_data"]["ProcessId"],res_src["@timestamp"],res_src["beat"]["name"],res_src["event_data"]["Image"],res_src["event_data"]["ImageLoaded"]
+        taptolist = list(eventdata)
+        eventlist.append(taptolist)
+        #print(eventdata)
+    pivot(eventlist)
+
+def pivot(eventlist):
+    eventdf = pd.DataFrame(eventlist)
+    eventdf.columns = ["ProcessID","Time","Client","Image","ImageLoaded"]
+    imagept = eventdf.pivot_table(index="ImageLoaded",columns="ProcessID",values="Time",aggfunc=lambda x: len(x),fill_value = 0)
+    imagept.to_csv("imagept.csv")
+    print(imagept)
 
 
 if __name__ == "__main__":
