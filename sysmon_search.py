@@ -9,8 +9,8 @@ jsonstring = {
     "size":10000,
     "query": {
         "match": {
-            "event_data.Image.keyword": {
-                "query": "C:\\tools\\mimikatz_20150621\\x64\\mimikatz.exe",
+            "event_data.Image": {
+                "query": "mimikatz.exe",
             }
         }
     }
